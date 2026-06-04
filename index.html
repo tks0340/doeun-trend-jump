@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="color-scheme" content="light only">
-  <title>도은 트렌드 점프 v1</title>
+  <title>도은 트렌드 점프 v2</title>
   <style>
     :root {
       color-scheme: light only;
@@ -315,7 +315,7 @@
     const panelText = document.getElementById("panelText");
     const startBtn = document.getElementById("startBtn");
 
-    const bestKey = "doeunTrendJumpBest_v1";
+    const bestKey = "doeunTrendJumpBest_v2";
     const state = {
       running: false,
       over: false,
@@ -332,7 +332,7 @@
       items: [],
       sparks: [],
       keys: { left: false, right: false },
-      player: { x: 0, y: 0, w: 34, h: 46, lane: 1, vy: 0, onGround: true, inv: 0 }
+      player: { x: 0, y: 0, w: 26, h: 34, lane: 1, vy: 0, onGround: true, inv: 0, groundY: 0 }
     };
 
     let bestScore = Number(localStorage.getItem(bestKey) || 0);
@@ -413,8 +413,9 @@
     function jump() {
       if (!state.running) return;
       if (state.player.onGround) {
-        state.player.vy = -470;
+        state.player.vy = -560;
         state.player.onGround = false;
+        toastEl.textContent = "점프 중에는 장애물을 확실히 피합니다";
         addSpark(state.player.x, state.player.y + 20, "#ffd45c", 8);
       }
     }
@@ -437,8 +438,8 @@
         lane,
         x: state.lanes[lane],
         y: -42,
-        w: kind === "cone" ? 32 : 42,
-        h: kind === "cone" ? 36 : 28,
+        w: kind === "cone" ? 28 : 34,
+        h: kind === "cone" ? 30 : 24,
         kind,
         hit: false
       });
@@ -492,6 +493,7 @@
       p.vy += 1180 * dt;
       p.y += p.vy * dt;
       const groundY = h - 78;
+      p.groundY = groundY;
       if (p.y >= groundY) {
         p.y = groundY;
         p.vy = 0;
@@ -501,7 +503,7 @@
       state.obstacles.forEach(o => {
         o.y += state.speed * dt;
         o.x = state.lanes[o.lane];
-        if (!o.hit && p.inv <= 0 && hitBox(p.x, p.y, p.w, p.h, o.x, o.y, o.w, o.h)) {
+        if (!o.hit && p.inv <= 0 && obstacleHitsPlayer(p, o)) {
           o.hit = true;
           p.inv = 1.05;
           state.combo = 0;
@@ -545,8 +547,28 @@
       }
     }
 
-    function hitBox(ax, ay, aw, ah, bx, by, bw, bh) {
-      return Math.abs(ax - bx) < (aw + bw) * .38 && Math.abs(ay - by) < (ah + bh) * .42;
+    function obstacleHitsPlayer(player, obstacle) {
+      const jumpClearHeight = 38;
+      const isClearlyJumping = player.y < player.groundY - jumpClearHeight;
+      if (isClearlyJumping) return false;
+
+      const playerBox = {
+        left: player.x - 12,
+        right: player.x + 12,
+        top: player.y - 30,
+        bottom: player.y + 12
+      };
+      const obstacleBox = {
+        left: obstacle.x - obstacle.w * .35,
+        right: obstacle.x + obstacle.w * .35,
+        top: obstacle.y - obstacle.h * .35,
+        bottom: obstacle.y + obstacle.h * .35
+      };
+      return rectsOverlap(playerBox, obstacleBox);
+    }
+
+    function rectsOverlap(a, b) {
+      return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
     }
 
     function hitCircle(ax, ay, ar, bx, by, br) {
