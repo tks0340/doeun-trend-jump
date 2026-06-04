@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="light only">
+  <title>도은 트렌드 점프 v1</title>
+  <style>
+    :root {
+      color-scheme: light only;
+      --ink: #202331;
+      --muted: #697083;
+      --paper: #fffdfa;
+      --line: #e7e1d8;
+      --sky: #9fe8ff;
+      --grass: #74ce69;
+      --pink: #ff6f9f;
+      --yellow: #ffd45c;
+      --mint: #45d6b5;
+      --blue: #5387ff;
+      --danger: #ff5b5b;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: #eaf9ff;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      touch-action: none;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: min(100vw, 430px);
+      height: 100dvh;
+      min-height: 560px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 7px;
+      padding: 8px;
+      background: linear-gradient(180deg, #dff8ff 0%, #fff7d8 54%, #d9f7c9 100%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+      padding: 7px 9px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 5px 14px rgba(35, 74, 97, .12);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      width: 126px;
+    }
+
+    .chip {
+      min-width: 0;
+      padding: 4px 5px;
+      border-radius: 7px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: .67rem;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.05);
+    }
+
+    .stage {
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      background: linear-gradient(180deg, var(--sky) 0%, #f8f3cc 52%, var(--grass) 100%);
+      box-shadow: 0 8px 18px rgba(35, 74, 97, .16);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      background: rgba(255, 255, 255, .64);
+      backdrop-filter: blur(4px);
+      z-index: 4;
+    }
+
+    .panel {
+      width: min(100%, 320px);
+      border-radius: 8px;
+      border: 2px solid #fff;
+      background: var(--paper);
+      padding: 14px;
+      box-shadow: 0 12px 28px rgba(38, 58, 81, .22);
+      text-align: center;
+    }
+
+    .panel h2 {
+      margin: 0 0 7px;
+      font-size: 1.45rem;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .panel p {
+      margin: 5px 0;
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .rank {
+      margin: 10px 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .rank div {
+      min-width: 0;
+      border-radius: 8px;
+      padding: 7px 5px;
+      background: #f6f7fb;
+      border: 1px solid var(--line);
+      font-size: .75rem;
+      font-weight: 900;
+    }
+
+    .rank b {
+      display: block;
+      font-size: 1.02rem;
+      margin-top: 2px;
+      color: var(--ink);
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 13px 12px;
+      background: linear-gradient(180deg, var(--pink), #f24e87);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 950;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.16), 0 5px 12px rgba(242, 78, 135, .24);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.16), 0 2px 7px rgba(242, 78, 135, .2);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 1.25fr;
+      gap: 7px;
+      height: 68px;
+    }
+
+    .ctrl {
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,.86);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.08), 0 5px 12px rgba(35, 74, 97, .12);
+      font-size: 1.55rem;
+      font-weight: 950;
+      color: var(--ink);
+    }
+
+    .ctrl.jump {
+      background: linear-gradient(180deg, #fff3b1, var(--yellow));
+      font-size: 1.05rem;
+    }
+
+    .toast {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      z-index: 3;
+      border-radius: 999px;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(255,255,255,.95);
+      padding: 5px 10px;
+      color: #4b5162;
+      font-size: .72rem;
+      font-weight: 850;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-height: 620px) {
+      .app { gap: 5px; padding: 6px; min-height: 0; }
+      header { padding: 5px 7px; }
+      h1 { font-size: .96rem; }
+      .sub { display: none; }
+      .controls { height: 58px; gap: 5px; }
+      .ctrl { font-size: 1.35rem; }
+      .ctrl.jump { font-size: .92rem; }
+      .panel { padding: 12px; }
+      .panel h2 { font-size: 1.25rem; }
+      .panel p { font-size: .78rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="도은 트렌드 점프 게임">
+    <header>
+      <div>
+        <h1>도은 트렌드 점프</h1>
+        <div class="sub">30초 안에 별과 젤리를 모으는 오비 런</div>
+      </div>
+      <div class="chips" aria-live="polite">
+        <div class="chip">점수 <span id="score">0</span></div>
+        <div class="chip">최고 <span id="best">0</span></div>
+        <div class="chip">시간 <span id="time">30</span></div>
+        <div class="chip">콤보 <span id="combo">0</span></div>
+      </div>
+    </header>
+
+    <section class="stage" id="stage">
+      <canvas id="game" aria-label="게임 화면"></canvas>
+      <div class="toast" id="toast">장애물은 피하고 별, 젤리, 하트를 모으세요</div>
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <h2 id="panelTitle">트렌드 오비 런</h2>
+          <p id="panelText">짧게 한 판, 터치로 바로 시작합니다.</p>
+          <div class="rank">
+            <div>목표<b>120</b></div>
+            <div>콤보<b>+보너스</b></div>
+            <div>시간<b>30초</b></div>
+          </div>
+          <button id="startBtn" type="button">시작</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="controls" aria-label="게임 조작">
+      <div class="ctrl" id="leftBtn" role="button" aria-label="왼쪽">◀</div>
+      <div class="ctrl" id="rightBtn" role="button" aria-label="오른쪽">▶</div>
+      <div class="ctrl jump" id="jumpBtn" role="button" aria-label="점프">점프</div>
+    </nav>
+  </main>
+
+  <script>
+    // 도은이가 바로 플레이할 수 있게 모든 게임 로직을 이 파일 안에 넣었습니다.
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const stage = document.getElementById("stage");
+    const scoreEl = document.getElementById("score");
+    const bestEl = document.getElementById("best");
+    const timeEl = document.getElementById("time");
+    const comboEl = document.getElementById("combo");
+    const toastEl = document.getElementById("toast");
+    const overlay = document.getElementById("overlay");
+    const panelTitle = document.getElementById("panelTitle");
+    const panelText = document.getElementById("panelText");
+    const startBtn = document.getElementById("startBtn");
+
+    const bestKey = "doeunTrendJumpBest_v1";
+    const state = {
+      running: false,
+      over: false,
+      last: 0,
+      score: 0,
+      combo: 0,
+      timeLeft: 30,
+      speed: 150,
+      spawnTimer: 0,
+      itemTimer: 0,
+      shake: 0,
+      lanes: [],
+      obstacles: [],
+      items: [],
+      sparks: [],
+      keys: { left: false, right: false },
+      player: { x: 0, y: 0, w: 34, h: 46, lane: 1, vy: 0, onGround: true, inv: 0 }
+    };
+
+    let bestScore = Number(localStorage.getItem(bestKey) || 0);
+    bestEl.textContent = bestScore;
+
+    function resizeCanvas() {
+      const rect = stage.getBoundingClientRect();
+      const ratio = Math.max(1, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      setLanes(rect.width);
+      if (!state.running) placePlayer();
+    }
+
+    function setLanes(width) {
+      const pad = Math.max(34, width * 0.14);
+      state.lanes = [pad, width / 2, width - pad];
+    }
+
+    function placePlayer() {
+      const h = stage.clientHeight || 430;
+      state.player.x = state.lanes[state.player.lane] || 0;
+      state.player.y = h - 78;
+      state.player.vy = 0;
+      state.player.onGround = true;
+    }
+
+    function resetGame() {
+      state.running = true;
+      state.over = false;
+      state.last = performance.now();
+      state.score = 0;
+      state.combo = 0;
+      state.timeLeft = 30;
+      state.speed = 150;
+      state.spawnTimer = 0;
+      state.itemTimer = 0;
+      state.shake = 0;
+      state.obstacles = [];
+      state.items = [];
+      state.sparks = [];
+      state.player.lane = 1;
+      state.player.inv = 0;
+      placePlayer();
+      overlay.classList.add("hidden");
+      toastEl.textContent = "반짝이는 아이템을 연속으로 먹으면 콤보 보너스!";
+      updateHud();
+      requestAnimationFrame(loop);
+    }
+
+    function endGame() {
+      state.running = false;
+      state.over = true;
+      if (state.score > bestScore) {
+        bestScore = state.score;
+        localStorage.setItem(bestKey, String(bestScore));
+      }
+      bestEl.textContent = bestScore;
+      panelTitle.textContent = state.score >= 120 ? "도은 클리어!" : "한 번 더!";
+      panelText.textContent = `점수 ${state.score}점, 최고 ${bestScore}점입니다.`;
+      startBtn.textContent = "다시 시작";
+      overlay.classList.remove("hidden");
+      updateHud();
+    }
+
+    function updateHud() {
+      scoreEl.textContent = state.score;
+      comboEl.textContent = state.combo;
+      timeEl.textContent = Math.max(0, Math.ceil(state.timeLeft));
+    }
+
+    function moveLane(dir) {
+      if (!state.running) return;
+      state.player.lane = Math.max(0, Math.min(2, state.player.lane + dir));
+    }
+
+    function jump() {
+      if (!state.running) return;
+      if (state.player.onGround) {
+        state.player.vy = -470;
+        state.player.onGround = false;
+        addSpark(state.player.x, state.player.y + 20, "#ffd45c", 8);
+      }
+    }
+
+    function addSpark(x, y, color, count) {
+      for (let i = 0; i < count; i++) {
+        state.sparks.push({
+          x, y, color,
+          vx: (Math.random() - .5) * 110,
+          vy: (Math.random() - .8) * 120,
+          life: .45
+        });
+      }
+    }
+
+    function spawnObstacle() {
+      const lane = Math.floor(Math.random() * 3);
+      const kind = Math.random() < .55 ? "cone" : "block";
+      state.obstacles.push({
+        lane,
+        x: state.lanes[lane],
+        y: -42,
+        w: kind === "cone" ? 32 : 42,
+        h: kind === "cone" ? 36 : 28,
+        kind,
+        hit: false
+      });
+    }
+
+    function spawnItem() {
+      const lane = Math.floor(Math.random() * 3);
+      const roll = Math.random();
+      const type = roll < .58 ? "star" : roll < .86 ? "jelly" : "heart";
+      state.items.push({
+        lane,
+        x: state.lanes[lane],
+        y: -30,
+        size: type === "heart" ? 25 : 23,
+        type,
+        spin: Math.random() * 6
+      });
+    }
+
+    function loop(now) {
+      if (!state.running) return;
+      const dt = Math.min(.033, (now - state.last) / 1000 || .016);
+      state.last = now;
+      update(dt);
+      draw();
+      if (state.running) requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      const p = state.player;
+      state.timeLeft -= dt;
+      state.speed += dt * 5.5;
+      state.spawnTimer -= dt;
+      state.itemTimer -= dt;
+      state.shake = Math.max(0, state.shake - dt * 8);
+      p.inv = Math.max(0, p.inv - dt);
+
+      if (state.spawnTimer <= 0) {
+        spawnObstacle();
+        state.spawnTimer = Math.max(.58, 1.05 - state.score * .0025 - Math.random() * .2);
+      }
+      if (state.itemTimer <= 0) {
+        spawnItem();
+        state.itemTimer = Math.max(.42, .72 - Math.random() * .12);
+      }
+
+      const targetX = state.lanes[p.lane];
+      p.x += (targetX - p.x) * Math.min(1, dt * 13);
+      p.vy += 1180 * dt;
+      p.y += p.vy * dt;
+      const groundY = h - 78;
+      if (p.y >= groundY) {
+        p.y = groundY;
+        p.vy = 0;
+        p.onGround = true;
+      }
+
+      state.obstacles.forEach(o => {
+        o.y += state.speed * dt;
+        o.x = state.lanes[o.lane];
+        if (!o.hit && p.inv <= 0 && hitBox(p.x, p.y, p.w, p.h, o.x, o.y, o.w, o.h)) {
+          o.hit = true;
+          p.inv = 1.05;
+          state.combo = 0;
+          state.score = Math.max(0, state.score - 18);
+          state.shake = .75;
+          toastEl.textContent = "장애물! 점프나 옆 이동으로 피해요";
+          addSpark(p.x, p.y, "#ff5b5b", 12);
+        }
+      });
+
+      state.items.forEach(item => {
+        item.y += (state.speed + 25) * dt;
+        item.x = state.lanes[item.lane] + Math.sin(nowish() * 4 + item.spin) * 5;
+        item.spin += dt * 6;
+        if (!item.got && hitCircle(p.x, p.y - 5, 28, item.x, item.y, item.size)) {
+          item.got = true;
+          state.combo += 1;
+          const base = item.type === "heart" ? 15 : item.type === "jelly" ? 9 : 7;
+          const bonus = Math.min(10, Math.floor(state.combo / 3) * 2);
+          state.score += base + bonus;
+          toastEl.textContent = state.combo >= 3 ? `콤보 ${state.combo}! 보너스 +${bonus}` : "좋아요! 계속 모아보세요";
+          addSpark(item.x, item.y, item.type === "heart" ? "#ff6f9f" : "#ffd45c", 10);
+        }
+      });
+
+      state.sparks.forEach(s => {
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.vy += 210 * dt;
+        s.life -= dt;
+      });
+
+      state.obstacles = state.obstacles.filter(o => o.y < h + 60);
+      state.items = state.items.filter(i => !i.got && i.y < h + 50);
+      state.sparks = state.sparks.filter(s => s.life > 0);
+      if (state.timeLeft <= 0) endGame();
+      updateHud();
+
+      if (w < 330) {
+        toastEl.textContent = "작은 화면 모드: 버튼으로 조작";
+      }
+    }
+
+    function hitBox(ax, ay, aw, ah, bx, by, bw, bh) {
+      return Math.abs(ax - bx) < (aw + bw) * .38 && Math.abs(ay - by) < (ah + bh) * .42;
+    }
+
+    function hitCircle(ax, ay, ar, bx, by, br) {
+      const dx = ax - bx;
+      const dy = ay - by;
+      return dx * dx + dy * dy < (ar + br) * (ar + br) * .58;
+    }
+
+    function nowish() {
+      return performance.now() / 1000;
+    }
+
+    function draw() {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const wobble = state.shake > 0 ? (Math.random() - .5) * 5 : 0;
+      ctx.save();
+      ctx.translate(wobble, 0);
+      drawBackground(w, h);
+      drawRoad(w, h);
+      state.items.forEach(drawItem);
+      state.obstacles.forEach(drawObstacle);
+      drawPlayer(state.player);
+      state.sparks.forEach(drawSpark);
+      ctx.restore();
+    }
+
+    function drawBackground(w, h) {
+      ctx.fillStyle = "rgba(255,255,255,.68)";
+      drawCloud((nowish() * 18) % (w + 120) - 80, 46, 1);
+      drawCloud((nowish() * 12 + 180) % (w + 140) - 90, 92, .8);
+
+      ctx.fillStyle = "#fff0a6";
+      ctx.beginPath();
+      ctx.arc(w - 42, 42, 26, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      for (let i = 0; i < 5; i++) {
+        const x = ((nowish() * 32 + i * 86) % (w + 60)) - 30;
+        ctx.fillRect(x, h * .18 + i % 2 * 34, 32, 6);
+      }
+    }
+
+    function drawCloud(x, y, scale) {
+      ctx.beginPath();
+      ctx.arc(x, y, 14 * scale, 0, Math.PI * 2);
+      ctx.arc(x + 18 * scale, y - 5 * scale, 17 * scale, 0, Math.PI * 2);
+      ctx.arc(x + 38 * scale, y, 13 * scale, 0, Math.PI * 2);
+      ctx.rect(x - 2 * scale, y, 46 * scale, 13 * scale);
+      ctx.fill();
+    }
+
+    function drawRoad(w, h) {
+      ctx.fillStyle = "#f6d986";
+      ctx.beginPath();
+      ctx.moveTo(w * .26, 0);
+      ctx.lineTo(w * .74, 0);
+      ctx.lineTo(w * .94, h);
+      ctx.lineTo(w * .06, h);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255,255,255,.8)";
+      ctx.lineWidth = 3;
+      state.lanes.forEach(x => {
+        ctx.setLineDash([12, 16]);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    function drawPlayer(p) {
+      const blink = p.inv > 0 && Math.floor(nowish() * 14) % 2 === 0;
+      if (blink) return;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+
+      ctx.fillStyle = "#5b8cff";
+      roundRect(-15, -24, 30, 42, 9);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffe5c4";
+      ctx.beginPath();
+      ctx.arc(0, -34, 17, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#403046";
+      ctx.beginPath();
+      ctx.arc(-6, -36, 2.2, 0, Math.PI * 2);
+      ctx.arc(6, -36, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#403046";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, -31, 5, 0, Math.PI);
+      ctx.stroke();
+
+      ctx.fillStyle = "#3f2b53";
+      ctx.beginPath();
+      ctx.arc(0, -48, 12, Math.PI, 0);
+      ctx.fill();
+
+      ctx.fillStyle = "#fff";
+      roundRect(-17, -5, 10, 20, 4);
+      roundRect(7, -5, 10, 20, 4);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawObstacle(o) {
+      ctx.save();
+      ctx.translate(o.x, o.y);
+      if (o.kind === "cone") {
+        ctx.fillStyle = "#ff8d4d";
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.lineTo(20, 18);
+        ctx.lineTo(-20, 18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(-11, 0, 22, 6);
+      } else {
+        ctx.fillStyle = "#6e6478";
+        roundRect(-22, -14, 44, 28, 7);
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.font = "900 15px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("!", 0, 1);
+      }
+      ctx.restore();
+    }
+
+    function drawItem(item) {
+      ctx.save();
+      ctx.translate(item.x, item.y);
+      ctx.rotate(Math.sin(item.spin) * .16);
+      if (item.type === "heart") {
+        ctx.fillStyle = "#ff6f9f";
+        ctx.beginPath();
+        ctx.moveTo(0, 13);
+        ctx.bezierCurveTo(-23, -5, -11, -22, 0, -10);
+        ctx.bezierCurveTo(11, -22, 23, -5, 0, 13);
+        ctx.fill();
+      } else if (item.type === "jelly") {
+        ctx.fillStyle = "#45d6b5";
+        roundRect(-13, -13, 26, 26, 8);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.7)";
+        ctx.fillRect(-7, -7, 9, 4);
+      } else {
+        drawStar(0, 0, 13, 6, "#ffd45c");
+      }
+      ctx.restore();
+    }
+
+    function drawStar(x, y, outer, inner, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? inner : outer;
+        const a = -Math.PI / 2 + i * Math.PI / 5;
+        ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawSpark(s) {
+      ctx.globalAlpha = Math.max(0, s.life / .45);
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function bindHold(el, onDown, onUp) {
+      el.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        el.setPointerCapture(e.pointerId);
+        onDown();
+      });
+      el.addEventListener("pointerup", onUp);
+      el.addEventListener("pointercancel", onUp);
+      el.addEventListener("pointerleave", onUp);
+    }
+
+    bindHold(document.getElementById("leftBtn"), () => moveLane(-1), () => {});
+    bindHold(document.getElementById("rightBtn"), () => moveLane(1), () => {});
+    bindHold(document.getElementById("jumpBtn"), jump, () => {});
+    startBtn.addEventListener("click", resetGame);
+
+    window.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") moveLane(-1);
+      if (e.key === "ArrowRight") moveLane(1);
+      if (e.key === " " || e.key === "ArrowUp") jump();
+      if (e.key === "Enter" && !state.running) resetGame();
+    });
+
+    let swipeStart = null;
+    stage.addEventListener("pointerdown", e => {
+      swipeStart = { x: e.clientX, y: e.clientY };
+    });
+    stage.addEventListener("pointerup", e => {
+      if (!swipeStart) return;
+      const dx = e.clientX - swipeStart.x;
+      const dy = e.clientY - swipeStart.y;
+      if (Math.abs(dx) > 32 && Math.abs(dx) > Math.abs(dy)) moveLane(dx > 0 ? 1 : -1);
+      if (dy < -28 || Math.abs(dx) < 18) jump();
+      swipeStart = null;
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    draw();
+  </script>
+</body>
+</html>
