@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="color-scheme" content="light only">
-  <title>도은 트렌드 점프 v3</title>
+  <title>도은 트렌드 점프 2026-06-06 v1</title>
   <style>
     :root {
       color-scheme: light only;
@@ -339,7 +339,7 @@
       <div class="overlay" id="overlay">
         <div class="panel">
           <h2 id="panelTitle">누가 더 멀리?</h2>
-          <p id="panelText">점점 빨라집니다. 피 0이면 끝!</p>
+          <p id="panelText">30초 뒤부터 빨라집니다. 피 0이면 끝!</p>
           <div class="rank">
             <div>기록<b>5등</b></div>
             <div>아이템<b>+거리</b></div>
@@ -442,7 +442,7 @@
       state.player.inv = 0;
       placePlayer();
       overlay.classList.add("hidden");
-      toastEl.textContent = "아이템은 거리 보너스, 장애물은 피 감소!";
+      toastEl.textContent = "처음 30초는 적응 시간, 그 뒤부터 빨라집니다!";
       updateHud();
       requestAnimationFrame(loop);
     }
@@ -581,7 +581,8 @@
       const h = stage.clientHeight;
       const p = state.player;
       state.elapsed += dt;
-      state.speed = 160 + Math.min(340, state.elapsed * 8.3);
+      const rampTime = Math.max(0, state.elapsed - 30);
+      state.speed = 160 + Math.min(340, rampTime * 11.5);
       state.distance += state.speed * dt * .085;
       state.spawnTimer -= dt;
       state.itemTimer -= dt;
@@ -590,7 +591,8 @@
 
       if (state.spawnTimer <= 0) {
         spawnObstacle();
-        state.spawnTimer = Math.max(.26, .92 - state.elapsed * .012 - Math.random() * .16);
+        const rampTime = Math.max(0, state.elapsed - 30);
+        state.spawnTimer = Math.max(.26, .92 - rampTime * .018 - Math.random() * .16);
       }
       if (state.itemTimer <= 0) {
         spawnItem();
